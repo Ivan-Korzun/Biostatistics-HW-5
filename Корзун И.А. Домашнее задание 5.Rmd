@@ -170,7 +170,7 @@ print(paste("ROC AUC:", roc_auc3))
 
 ```{r}
 # Создадим модель со всеми тремя переменными
-logistic_model4 <- lm(radius_mean ~ texture_mean + area_mean + symmetry_mean, data = df)
+logistic_model4 <- lm(diagnosis ~ texture_mean + area_mean + symmetry_mean, data = df)
 
 # Напечатаем информационные критерии
 logistic_model4_AIC <- AIC(logistic_model4)
@@ -200,7 +200,7 @@ combined_df <- data.frame(Model = model_names, Variable = variables, AIC = AIC_v
 print(combined_df)
 ```
 
-Модель, использующая все 3 переменные, получила совсем незначительный прирост ROC AUC, но при этом является куда более сложной. Поэтому она не является предпочтительной. Излишняя сложность модель подтверждается существенным увеличением AIC и BIC. Из рассмотренных моделей наилучшей является модель 2, использующая area_mean.
+Модель, использующая все 3 переменные, является наиболее точной.
 
 ## Задание 3
 
