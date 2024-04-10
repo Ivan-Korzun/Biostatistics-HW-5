@@ -170,7 +170,7 @@ print(paste("ROC AUC:", roc_auc3))
 
 ```{r}
 # Создадим модель со всеми тремя переменными
-logistic_model4 <- lm(diagnosis ~ texture_mean + area_mean + symmetry_mean, data = df)
+logistic_model4 <- glm(diagnosis ~ texture_mean + area_mean + symmetry_mean, data = df)
 
 # Напечатаем информационные критерии
 logistic_model4_AIC <- AIC(logistic_model4)
