@@ -1,0 +1,254 @@
+---
+title: "Домашнее задание 5"
+author: "Корзун И.А."
+date: "2024-04-10"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Задание 1
+
+```{r}
+library(ggplot2)
+library(pROC)
+```
+
+```{r}
+# Загрузим данные
+df <- read.csv('wisconsin_breast_cancer.csv', sep=",")
+```
+
+```{r}
+# Создадим модель среднего радиуса опухоли и средней площади
+model1 <- lm(radius_mean ~ area_mean, data = df)
+summary(model1)
+```
+
+```{r}
+# Построим график модели
+ggplot(df, aes(x = area_mean, y = radius_mean)) +
+  geom_point() +
+  geom_smooth(method = "lm", se = FALSE)
+
+# Напечатаем информационные критерии
+model1_AIC <- AIC(model1)
+model1_BIC <- BIC(model1)
+cat("AIC =", model1_AIC, "\n")
+cat("BIC =", model1_BIC, "\n")
+```
+
+Наблюдается положительная взаимосвязь между площадью и радиусом опухоли
+
+```{r}
+# Создадим модель среднего радиуса опухоли и среднего периметра
+model2 <- lm(radius_mean ~ perimeter_mean, data = df)
+
+# Построим график модели
+ggplot(df, aes(x = perimeter_mean, y = radius_mean)) +
+  geom_point() +
+  geom_smooth(method = "lm", se = FALSE)
+
+# Напечатаем информационные критерии
+model2_AIC <- AIC(model2)
+model2_BIC <- BIC(model2)
+cat("AIC =", model2_AIC, "\n")
+cat("BIC =", model2_BIC, "\n")
+```
+
+В данном случае зависимость более точная, что видно и на графике (данные лежат почти на одной прямой), и подтвержадется меньшими значениями информационных критериев и большим значением Adjusted R2.
+
+```{r}
+# Создадим модель среднего радиуса опухоли и средней симметричности
+model3 <- lm(radius_mean ~ symmetry_mean, data = df)
+
+# Построим график модели
+ggplot(df, aes(x = symmetry_mean, y = radius_mean)) +
+  geom_point() +
+  geom_smooth(method = "lm", se = FALSE)
+
+# Напечатаем информационные критерии
+model3_AIC <- AIC(model3)
+model3_BIC <- BIC(model3)
+cat("AIC =", model3_AIC, "\n")
+cat("BIC =", model3_BIC, "\n")
+```
+
+В данном случае связь очень слабая, что видно и графически, и по критериям.
+
+## Задание 2
+
+```{r}
+# Заменим M и B на 1 и 0
+df$diagnosis <- ifelse(df$diagnosis == "M", 1, 0)
+```
+
+```{r}
+# Создадим логистическую регрессию на основе среднего радиуса опухоли
+logistic_model1 <- glm(diagnosis ~ radius_mean, data = df, family = "binomial")
+
+# Построим график модели
+ggplot(df, aes(x = radius_mean, y = diagnosis)) +
+  geom_point() +
+  geom_smooth(method = "glm", se = FALSE, method.args = list(family = "binomial"))
+
+# Напечатаем информационные критерии
+logistic_model1_AIC <- AIC(logistic_model1)
+logistic_model1_BIC <- BIC(logistic_model1)
+cat("AIC =", logistic_model1_AIC, "\n")
+cat("BIC =", logistic_model1_BIC, "\n")
+```
+
+```{r}
+# Предскажем вероятности
+predictions1 <- predict(logistic_model1, type = "response")
+
+# Создадим ROC-кривую
+roc_curve1 <- roc(df$diagnosis, predictions1)
+plot(roc_curve1, main = "ROC Curve", col = "blue")
+
+# Вычислим ROC-AUC
+roc_auc1 <- auc(roc_curve1)
+print(paste("ROC AUC:", roc_auc1))
+```
+
+С увеличением среднего радиуса повышается вероятность, что опухоль является злокачественной
+
+```{r}
+# Создадим логистическую регрессию на основе средней площади
+logistic_model2 <- glm(diagnosis ~ area_mean, data = df, family = "binomial")
+
+# Построим график модели
+ggplot(df, aes(x = area_mean, y = diagnosis)) +
+  geom_point() +
+  geom_smooth(method = "glm", se = FALSE, method.args = list(family = "binomial"))
+
+# Напечатаем информационные критерии
+logistic_model2_AIC <- AIC(logistic_model2)
+logistic_model2_BIC <- BIC(logistic_model2)
+cat("AIC =", logistic_model2_AIC, "\n")
+cat("BIC =", logistic_model2_BIC, "\n")
+
+# Предскажем вероятности
+predictions2 <- predict(logistic_model2, type = "response")
+# Создадим ROC-кривую
+roc_curve2 <- roc(df$diagnosis, predictions2)
+# Вычислим ROC-AUC
+roc_auc2 <- auc(roc_curve2)
+print(paste("ROC AUC:", roc_auc2))
+```
+
+Данная модель чуть более точная
+
+```{r}
+# Создадим логистическую регрессию на основе средней текстуры
+logistic_model3 <- glm(diagnosis ~ texture_mean, data = df, family = "binomial")
+
+# Построим график модели
+ggplot(df, aes(x = texture_mean, y = diagnosis)) +
+  geom_point() +
+  geom_smooth(method = "glm", se = FALSE, method.args = list(family = "binomial"))
+
+# Напечатаем информационные критерии
+logistic_model3_AIC <- AIC(logistic_model3)
+logistic_model3_BIC <- BIC(logistic_model3)
+cat("AIC =", logistic_model3_AIC, "\n")
+cat("BIC =", logistic_model3_BIC, "\n")
+
+# Предскажем вероятности
+predictions3 <- predict(logistic_model3, type = "response")
+# Создадим ROC-кривую
+roc_curve3 <- roc(df$diagnosis, predictions3)
+# Вычислим ROC-AUC
+roc_auc3 <- auc(roc_curve3)
+print(paste("ROC AUC:", roc_auc3))
+```
+
+Данная модель значительно менее точная, то есть текстура куда хуже позволяет предсказать злокачественность опухоли, чем ее радиус и средняя площадь.
+
+```{r}
+# Создадим модель со всеми тремя переменными
+logistic_model4 <- lm(radius_mean ~ texture_mean + area_mean + symmetry_mean, data = df)
+
+# Напечатаем информационные критерии
+logistic_model4_AIC <- AIC(logistic_model4)
+logistic_model4_BIC <- BIC(logistic_model4)
+cat("AIC =", logistic_model4_AIC, "\n")
+cat("BIC =", logistic_model4_BIC, "\n")
+
+# Предскажем вероятности
+predictions4 <- predict(logistic_model4, type = "response")
+# Создадим ROC-кривую
+roc_curve4 <- roc(df$diagnosis, predictions4)
+# Вычислим ROC-AUC
+roc_auc4 <- auc(roc_curve4)
+print(paste("ROC AUC:", roc_auc4))
+```
+
+Суммируем информацию о предиктивной значимости моделей в таблице
+
+```{r}
+# Создадим датафрейм
+model_names <- c("logistic_model1", "logistic_model2", "logistic_model3", "logistic_model4")
+variables <- c("radius_mean", "area_mean", "texture_mean", "radius, area, texture")
+AIC_values <- c(logistic_model1_AIC, logistic_model2_AIC, logistic_model3_AIC, logistic_model4_AIC)
+BIC_values <- c(logistic_model1_BIC, logistic_model2_BIC, logistic_model3_BIC, logistic_model4_BIC)
+ROC_AUC_values <- c(roc_auc1, roc_auc2, roc_auc3, roc_auc4)
+combined_df <- data.frame(Model = model_names, Variable = variables, AIC = AIC_values, BIC = BIC_values, ROC_AUC = ROC_AUC_values)
+print(combined_df)
+```
+
+Модель, использующая все 3 переменные, получила совсем незначительный прирост ROC AUC, но при этом является куда более сложной. Поэтому она не является предпочтительной. Излишняя сложность модель подтверждается существенным увеличением AIC и BIC. Из рассмотренных моделей наилучшей является модель 2, использующая area_mean.
+
+## Задание 3
+
+```{r}
+library(survival)
+library(survminer)
+```
+
+```{r}
+# Загрузим данные
+lung = survival::lung
+
+# Создадим переменную event
+lung$event <- as.numeric(lung$status == 2)
+```
+
+```{r}
+# Создадим модель выживаемости для каждого пола
+lung_survfit <- survfit(Surv(time, status) ~ sex, data = lung)
+
+# Отобразим модель на графике
+ggsurvplot(lung_survfit, data = lung, risk.table = TRUE)
+
+# Выполним log-rank тест для сравнения выживаемости мужчин и женщин
+lung_survdiff <- survdiff(Surv(time, status) ~ sex, data = lung)
+lung_survdiff
+```
+
+Выживаемость у женщин (sex = 2) выше, чем у мужчин. Это очевидно из графика, а также подтверждается log-rank тестом (p-value = 0.001 \< 0.05, то есть между группами есть статистически значимая разница).
+
+```{r}
+# Построим график cumulative hazard function
+ggsurvplot(lung_survfit, data = lung, fun = "cumhaz", conf.int = TRUE)
+```
+
+График показывает, что кумулятивный риск (наступления исхода) выше у мужчин (sex = 1), чем у женщин.
+
+С течением времени риск возрастает.
+
+С течением времени также уменьшается число наблюдений, что приводит к увеличению доверительных интервалов из-за меньшей уверенности в точности предсказаний.
+
+```{r}
+# Создадим Cox-регрессию
+lung_cox <- coxph(Surv(time, status) ~ sex, data = lung)
+lung_cox
+
+# Построим график
+ggsurvplot(surv_fit(lung_cox, data = lung), data = lung)
+```
+
+Пол является статистически значимым предиктором (p-value \< 0.05). Так как коэффицент равен -0.53, то риск для женщин меньше, чем для мужчин. exp(coef) = 0.5880. Это значит, что для женщин hazard меньше на 0.588, т.е. риск меньше на 41% (<http://www.sthda.com/english/wiki/cox-proportional-hazards-model>).
